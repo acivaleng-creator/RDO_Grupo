@@ -1,0 +1,37 @@
+name: Compilar RDO Android
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar os arquivos do projeto
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Preparar o Java para Android
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Instalar o motor Flet e dependências
+        run: |
+          pip install flet==0.23.2
+          pip install reportlab==4.4.10
+          pip install pillow==12.1.1
+
+      - name: Compilar o APK
+        run: flet build apk
+
+      - name: Entregar o APK pronto
+        uses: actions/upload-artifact@v4
+        with:
+          name: RDO_Grupo_Instalador
+          path: build/apk/*.apk
