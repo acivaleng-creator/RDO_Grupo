@@ -33,10 +33,11 @@ jobs:
           pip install pillow==12.1.1
           pip install six
 
-      - name: Correção de compatibilidade Unicode
+      - name: Limpeza de compatibilidade Unicode
         run: |
-          # Esta linha substitui qualquer menção problemática de unicode no motor de build
+          # Remove referências a 'unicode' em arquivos de dependências que causam erro no Linux
           find . -name "*.py" -exec sed -i 's/unicode(/str(/g' {} + || true
+          find . -name "*.py" -exec sed -i "s/, unicode/, str/g" {} + || true
 
       - name: Compilar o APK Final
         run: flet build apk
