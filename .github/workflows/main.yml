@@ -54,3 +54,4 @@ jobs:
         with:
           name: RDO_Grupo_Instalador
           path: build/apk/*.apk
+
