@@ -31,11 +31,14 @@ jobs:
           pip install flet==0.23.2
           pip install reportlab==4.4.10
           pip install pillow==12.1.1
+          pip install six # Essa biblioteca ajuda a resolver o erro de 'unicode'
 
       - name: Compilar o APK Final
         run: flet build apk
+        env:
+          PYTHONUNBUFFERED: 1
 
-      - name: Disponibilizar APK para Download
+      - name: Disponibilizar APK para baixar
         uses: actions/upload-artifact@v4
         with:
           name: RDO_Grupo_Instalador
