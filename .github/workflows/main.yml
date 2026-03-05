@@ -1,4 +1,10 @@
-name: Compilar RDO Android
+- name: Compilar o APK Final
+        run: |
+          # Força o Python a ignorar a localização do sistema
+          export PYTHONUTF8=1
+          export LC_ALL=C.UTF-8
+          export LANG=C.UTF-8
+          flet build apk
 
 on:
   workflow_dispatch:
