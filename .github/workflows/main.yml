@@ -7,7 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      # Bloqueia o erro 'encoding must be str, not None' forçando UTF-8 global
       PYTHONUTF8: 1
+      PYTHONIOENCODING: utf-8
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
     steps:
@@ -19,43 +21,43 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Configurar Java
+      - name: Configurar Java (Android SDK)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Instalar Flutter
+      - name: Instalar Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Instalar Flet e ReportLab
+      - name: Instalar Flet e Dependências do RDO
         run: |
           pip install flet==0.23.2
           pip install reportlab==4.4.10
           pip install pillow==12.1.1
           pip install urllib3==2.2.1
+          pip install six
 
-      - name: Limpeza Industrial de Arquivos
+      - name: Limpeza Industrial de Arquivos (Windows to Linux)
         run: |
-          # Define unicode como str para o ReportLab não quebrar no Python 3
+          # Define unicode como str para o ReportLab rodar no Python 3
           SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
           echo "import builtins; builtins.unicode = str" > $SITE_PACKAGES/sitecustomize.py
-          # Remove o "lixo" invisível do Windows em todos os arquivos .py e .toml
-          find . -type f -name "*.py" -o -name "*.toml" | xargs sed -i 's/\r$//'
+          # Remove caracteres invisíveis (BOM/CRLF) de TODOS os arquivos de config
+          find . -type f -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs sed -i 's/\r$//'
+          find . -type f -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs sed -i '1s/^\xEF\xBB\xBF//'
 
       - name: Compilar o APK Final
         run: |
-          # Define o ambiente para UTF-8 puro no momento do build
+          # Força o ambiente UTF-8 no milisegundo do build
           export PYTHONUTF8=1
           export LANG=en_US.UTF-8
           export LC_ALL=en_US.UTF-8
-          # Garante que o flet.toml esteja limpo
-          sed -i 's/\r$//' flet.toml
-          flet build apk
+          flet build apk --verbose
 
-      - name: Upload do APK pronto
+      - name: Disponibilizar APK para Download
         uses: actions/upload-artifact@v4
         with:
           name: RDO_Grupo_Instalador
