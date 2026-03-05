@@ -7,11 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Bloqueia o erro 'encoding must be str, not None' forçando UTF-8 global
       PYTHONUTF8: 1
-      PYTHONIOENCODING: utf-8
       LANG: en_US.UTF-8
-      LC_ALL: en_US.UTF-8
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -21,43 +18,30 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Configurar Java (Android SDK)
+      - name: Configurar Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Instalar Flutter SDK
+      - name: Instalar Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Instalar Flet e Dependências do RDO
+      - name: Instalar motor Flet e ReportLab
         run: |
-          pip install flet==0.23.2
-          pip install reportlab==4.4.10
-          pip install pillow==12.1.1
-          pip install urllib3==2.2.1
-          pip install six
-
-      - name: Limpeza Industrial de Arquivos (Windows to Linux)
-        run: |
-          # Define unicode como str para o ReportLab rodar no Python 3
+          pip install flet==0.23.2 reportlab==4.4.10 pillow==12.1.1
+          # Injeção para corrigir o erro de unicode no Linux
           SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
           echo "import builtins; builtins.unicode = str" > $SITE_PACKAGES/sitecustomize.py
-          # Remove caracteres invisíveis (BOM/CRLF) de TODOS os arquivos de config
-          find . -type f -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs sed -i 's/\r$//'
-          find . -type f -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs sed -i '1s/^\xEF\xBB\xBF//'
 
       - name: Compilar o APK Final
         run: |
-          # Força o ambiente UTF-8 no milisegundo do build
           export PYTHONUTF8=1
-          export LANG=en_US.UTF-8
-          export LC_ALL=en_US.UTF-8
           flet build apk --verbose
 
-      - name: Disponibilizar APK para Download
+      - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
           name: RDO_Grupo_Instalador
