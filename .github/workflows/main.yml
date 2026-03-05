@@ -30,18 +30,16 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Instalar Flet e ReportLab
+      - name: Instalar Dependências e Limpador
         run: |
-          pip install flet==0.23.2
-          pip install reportlab==4.4.10
-          pip install pillow==12.1.1
-          pip install urllib3==2.2.1
+          sudo apt-get install -y dos2unix
+          pip install flet==0.23.2 reportlab==4.4.10 pillow==12.1.1 urllib3==2.2.1 six
 
-      - name: Limpeza e Conversão de Arquivos (UTF-8 sem BOM)
+      - name: Conversão Industrial para Linux
         run: |
-          # Remove o caractere BOM invisível e converte arquivos para UTF-8 puro
-          find . -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs sed -i '1s/^\xEF\xBB\xBF//'
-          # Resolve o erro de unicode injetando o tradutor
+          # Converte todos os arquivos de texto do formato Windows para Linux
+          find . -type f -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs dos2unix
+          # Injeta o tradutor de unicode
           SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
           echo "import builtins; builtins.unicode = str" > $SITE_PACKAGES/sitecustomize.py
 
