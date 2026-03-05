@@ -7,7 +7,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Força o ambiente a falar UTF-8 e evita o erro de 'encoding'
       PYTHONUTF8: 1
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
@@ -40,21 +39,23 @@ jobs:
 
       - name: Limpeza Industrial de Arquivos
         run: |
-          # Remove o caractere invisível BOM do Windows e corrige o fim de linha
-          find . -type f -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs sed -i '1s/^\xEF\xBB\xBF//'
-          # Resolve o erro 'unicode is not defined' injetando o tradutor
+          # Define unicode como str para o ReportLab não quebrar no Python 3
           SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
           echo "import builtins; builtins.unicode = str" > $SITE_PACKAGES/sitecustomize.py
+          # Remove o "lixo" invisível do Windows em todos os arquivos .py e .toml
+          find . -type f -name "*.py" -o -name "*.toml" | xargs sed -i 's/\r$//'
 
       - name: Compilar o APK Final
         run: |
-          # Força o Python a ignorar a localização do sistema no momento exato do build
+          # Define o ambiente para UTF-8 puro no momento do build
           export PYTHONUTF8=1
-          export LC_ALL=C.UTF-8
-          export LANG=C.UTF-8
+          export LANG=en_US.UTF-8
+          export LC_ALL=en_US.UTF-8
+          # Garante que o flet.toml esteja limpo
+          sed -i 's/\r$//' flet.toml
           flet build apk
 
-      - name: Upload do APK
+      - name: Upload do APK pronto
         uses: actions/upload-artifact@v4
         with:
           name: RDO_Grupo_Instalador
