@@ -1,10 +1,4 @@
-- name: Compilar o APK Final
-        run: |
-          # Força o Python a ignorar a localização do sistema
-          export PYTHONUTF8=1
-          export LC_ALL=C.UTF-8
-          export LANG=C.UTF-8
-          flet build apk
+name: Compilar RDO Android
 
 on:
   workflow_dispatch:
@@ -13,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Essas 3 linhas resolvem o erro "encoding must be str, not None"
+      # Força o ambiente a falar UTF-8 e evita o erro de 'encoding'
       PYTHONUTF8: 1
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
@@ -53,7 +47,12 @@ jobs:
           echo "import builtins; builtins.unicode = str" > $SITE_PACKAGES/sitecustomize.py
 
       - name: Compilar o APK Final
-        run: flet build apk
+        run: |
+          # Força o Python a ignorar a localização do sistema no momento exato do build
+          export PYTHONUTF8=1
+          export LC_ALL=C.UTF-8
+          export LANG=C.UTF-8
+          flet build apk
 
       - name: Upload do APK
         uses: actions/upload-artifact@v4
