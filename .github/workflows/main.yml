@@ -15,22 +15,27 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Preparar o Java para Android
+      - name: Preparar o Java (Android SDK)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Instalar o motor Flet e dependências
+      - name: Instalar Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Instalar motor Flet e ReportLab
         run: |
           pip install flet==0.23.2
           pip install reportlab==4.4.10
           pip install pillow==12.1.1
 
-      - name: Compilar o APK
+      - name: Compilar o APK Final
         run: flet build apk
 
-      - name: Entregar o APK pronto
+      - name: Disponibilizar APK para Download
         uses: actions/upload-artifact@v4
         with:
           name: RDO_Grupo_Instalador
