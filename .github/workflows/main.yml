@@ -6,6 +6,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # FORÇA O AMBIENTE A FALAR UTF-8 (Resolve o erro de encoding)
+      PYTHONIOENCODING: utf-8
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
@@ -26,24 +31,24 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Instalar Flet e ReportLab
+      - name: Instalar dependências
         run: |
           pip install flet==0.23.2
           pip install reportlab==4.4.10
           pip install pillow==12.1.1
+          pip install urllib3==2.2.1
 
-      - name: Tradutor de Unicode (Correção Atômica)
+      - name: Corrigir unicode Python 2 -> 3
         run: |
-          # Esta linha injeta a definição de unicode no sistema para enganar o erro
           SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
-          echo "import builtins; builtins.unicode = str" > $SITE_PACKAGES/sitecustomize.py
-          # Também corrige nos arquivos do projeto
+          echo "import builtins; builtins.unicode = str" | tee $SITE_PACKAGES/sitecustomize.py
+          # Garante que o sistema ignore referências a unicode nos arquivos do projeto
           find . -name "*.py" -exec sed -i 's/unicode(/str(/g' {} + || true
 
       - name: Compilar o APK Final
         run: flet build apk
 
-      - name: Upload do APK
+      - name: Upload do APK pronto
         uses: actions/upload-artifact@v4
         with:
           name: RDO_Grupo_Instalador
