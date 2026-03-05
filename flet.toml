@@ -1,7 +1,8 @@
 [package]
 name = "RDO Grupo"
-package_name = "rdogrupo"
+package_name = "com.acival.rdogrupo""
 version = "1.0.1"
 build_number = 2
 [android]
 permissions = ["android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.MANAGE_EXTERNAL_STORAGE"]
+
