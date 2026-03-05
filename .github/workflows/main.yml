@@ -1,4 +1,4 @@
-name: Build Android RDO Final
+name: Build RDO Final Blindado
 
 on:
   workflow_dispatch:
@@ -13,41 +13,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python/Java/Flutter
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
+      
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-
+          
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Instalar Dependencias
+      - name: Instalar Libs e Corrigir Unicode
         run: |
           pip install flet==0.23.2 reportlab==4.4.10 pillow==12.1.1
-          # Corrige o erro 'unicode is not defined' para o ReportLab
           SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
           echo "import builtins; builtins.unicode = str" > $SITE_PACKAGES/sitecustomize.py
 
-      - name: Limpeza de Encoding
+      - name: Limpeza Bruta de Encoding
         run: |
-          # Converte arquivos Windows para o padrao Linux
-          find . -type f -name "*.py" -o -name "*.toml" | xargs sed -i 's/\r$//'
+          # Transforma todos os arquivos em formato legivel para Linux
+          find . -type f -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs sed -i 's/\r$//'
 
       - name: Compilar APK
         run: |
           export PYTHONUTF8=1
           flet build apk --verbose
 
-      - name: Upload
+      - name: Download APK
         uses: actions/upload-artifact@v4
         with:
-          name: RDO_Grupo_App
+          name: RDO_Grupo_APK
           path: build/apk/*.apk
