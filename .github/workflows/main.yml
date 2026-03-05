@@ -7,7 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      PYTHONIOENCODING: utf-8
+      # Essas 3 linhas resolvem o erro "encoding must be str, not None"
+      PYTHONUTF8: 1
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
     steps:
@@ -30,16 +31,18 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Instalar Dependências e Limpador
+      - name: Instalar Flet e ReportLab
         run: |
-          sudo apt-get install -y dos2unix
-          pip install flet==0.23.2 reportlab==4.4.10 pillow==12.1.1 urllib3==2.2.1 six
+          pip install flet==0.23.2
+          pip install reportlab==4.4.10
+          pip install pillow==12.1.1
+          pip install urllib3==2.2.1
 
-      - name: Conversão Industrial para Linux
+      - name: Limpeza Industrial de Arquivos
         run: |
-          # Converte todos os arquivos de texto do formato Windows para Linux
-          find . -type f -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs dos2unix
-          # Injeta o tradutor de unicode
+          # Remove o caractere invisível BOM do Windows e corrige o fim de linha
+          find . -type f -name "*.py" -o -name "*.toml" -o -name "*.txt" | xargs sed -i '1s/^\xEF\xBB\xBF//'
+          # Resolve o erro 'unicode is not defined' injetando o tradutor
           SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
           echo "import builtins; builtins.unicode = str" > $SITE_PACKAGES/sitecustomize.py
 
